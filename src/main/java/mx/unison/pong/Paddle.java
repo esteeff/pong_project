@@ -1,52 +1,43 @@
 package mx.unison.pong;
 
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.RectangularShape;
 
 public class Paddle {
-    public static final int WIDTH = 80;
-    public static final int HEIGHT = 30;
+    private double x, y; // Posición
+    private final double WIDTH = 100; // Ancho de la raqueta
+    private final double HEIGHT = 15; // Alto de la raqueta
+    private final double SPEED = 8; // Velocidad de movimiento
 
-    private final int[] xPositions = { 0,80,160,240,320,400,480,560};
-    private final Rectangle2D.Double paddle;
-    private int pos ;
-
-    public Paddle() {
-        super();
-        pos = 4; // raqueta inicia al centro
-        paddle = new Rectangle2D.Double(xPositions[pos],450,WIDTH,HEIGHT);
+    public Paddle(double x, double y) {
+        this.x = x;
+        this.y = y;
     }
 
-    public synchronized void moveRight() {
-        if( pos < 7 ) {
-            pos++;
-            paddle.x = xPositions[pos];
+    public void moveLeft() {
+        x -= SPEED;
+    }
+
+    public void moveRight() {
+        x += SPEED;
+    }
+
+    // Método para que la raqueta no se salga de la pantalla
+    public void keepInBounds(double boardWidth) {
+        if (x < 0) {
+            x = 0; // Si se sale por la izquierda, la pega al borde
+        }
+        if (x + WIDTH > boardWidth) {
+            x = boardWidth - WIDTH; // Si se sale por la derecha, la pega al borde
         }
     }
 
-    public synchronized void moveLeft() {
-        if( pos > 0 ) {
-            pos--;
-            paddle.x = xPositions[pos];
-        }
+    public Rectangle2D getBounds() {
+        return new Rectangle2D.Double(x, y, WIDTH, HEIGHT);
     }
 
-    // regresa el rectangulo que se va a dibujar
-    public Rectangle2D.Double getPaddle() {
-        return paddle;
-    }
-
-    // verifica si la pelota toco la raqueta
-    public boolean check( int x, int y) {
-        return paddle.contains(x,y);
-    }
-
-    // verifica si la pelota toco la raqueta
-    public boolean intersects(RectangularShape shape) {
-        boolean result;
-
-        result = paddle.intersects( shape.getBounds2D() );
-
-        return result;
-    }
+    // Getters
+    public double getX() { return x; }
+    public double getY() { return y; }
+    public double getWidth() { return WIDTH; }
+    public double getHeight() { return HEIGHT; }
 }
