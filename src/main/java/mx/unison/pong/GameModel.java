@@ -3,6 +3,7 @@ package mx.unison.pong;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.Toolkit;
 
 public class GameModel {
     public static final int WIDTH = 640;
@@ -78,41 +79,50 @@ public class GameModel {
 
          ball.move();
 
-        // colisión con paredes laterales
+         // colisión con paredes 
         if (ball.getX() <= 0) {
             ball.setX(0);
-            ball.setDx(-ball.getDx()); // rebote
+            ball.setDx(-ball.getDx()); 
+            Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
         } else if (ball.getX() + ball.getDiameter() >= WIDTH) {
             ball.setX(WIDTH - ball.getDiameter());
             ball.setDx(-ball.getDx());
+            Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
         }
 
         // colisión con el techo
         if (ball.getY() <= 0) {
             ball.setY(0);
             ball.setDy(-ball.getDy());
+            Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
         }
 
         // colisión con la raqueta
         if (ball.getBounds().intersects(paddle.getBounds())) {
-            if (ball.getDy() > 0) { // solo rebotar si va hacia abajo
+            if (ball.getDy() > 0) { 
                 ball.setY(paddle.getY() - ball.getDiameter());
                 ball.setDy(-ball.getDy());
+                Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
             }
         }
 
         // colisión con los ladrillos
         for (Brick brick : bricks) {
             if (!brick.isDestroyed() && ball.getBounds().intersects(brick.getShape())) {
-                brick.hit(); // le pega al ladrillo
-                ball.setDy(-ball.getDy()); // rebote vertical
-                score += 10; // sumar puntos
-                break; // solo romper un ladrillo por frame
+                brick.hit(); 
+                ball.setDy(-ball.getDy()); 
+                score += 10; 
+                Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
+                break; 
             }
         }
 
         // perdida de pelota (cae al fondo)
+
+        
         if (ball.getY() > HEIGHT) {
+            Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
+            Toolkit.getDefaultToolkit().beep(); // <-- Dos veces para que suene diferente
             lives--;
             if (lives <= 0) {
                 state = GameState.GAME_OVER;
@@ -121,6 +131,7 @@ public class GameModel {
                 ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 4, -4);
                 paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
             }
+
         }
 
         // condición de victoria

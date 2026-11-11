@@ -31,7 +31,7 @@ public class GamePanel extends JPanel {
         setupKeyBindings();
     }
 
-    @Override
+      @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
@@ -43,7 +43,7 @@ public class GamePanel extends JPanel {
 
         // pelota
         Ball b = model.getBall();
-        g2d.setColor(Color.WHITE); // O Color.RED para que resalte
+        g2d.setColor(Color.WHITE); 
         g2d.fillOval((int) b.getX(), (int) b.getY(), b.getDiameter(), b.getDiameter());
 
         // ladrillos
@@ -55,31 +55,34 @@ public class GamePanel extends JPanel {
             }
         }
 
-        // puntaje
+        // puntaje y vidas
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + model.getScore(), 10, 20);
+        
+        // vidas
+        g2d.setColor(Color.RED);
+        g2d.drawString("Vidas: " + model.getLives(), 10, 45);
 
         // mensajes de estado
-        g2d.setFont(new Font("Arial", Font.BOLD, 30));
         g2d.setColor(Color.YELLOW);
         String msg = "";
         
-            if (model.getState() == GameState.READY) {
-            msg = "Presiona flecha arriba para comenzar";
-            g2d.setFont(new Font("Arial", Font.BOLD, 20)); // letra un poco más chica
+        if (model.getState() == GameState.READY) {
+            msg = "Presiona Flecha Arriba para comenzar";
+            g2d.setFont(new Font("Arial", Font.BOLD, 20));
         } else if (model.getState() == GameState.PAUSED) {
             msg = "PAUSADO";
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
         } else if (model.getState() == GameState.GAME_OVER) {
             msg = "GAME OVER - Presiona R para reiniciar";
-            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            g2d.setFont(new Font("Arial", Font.BOLD, 25));
         } else if (model.getState() == GameState.WIN) {
-            msg = "¡GANASTE!";
-            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            msg = "¡GANASTE! - Presiona R para reiniciar";
+            g2d.setFont(new Font("Arial", Font.BOLD, 25));
         }
 
         if (!msg.isEmpty()) {
-            // centrar el texto en pantalla
             FontMetrics fm = g2d.getFontMetrics();
             int x = (getWidth() - fm.stringWidth(msg)) / 2;
             int y = getHeight() / 2;
@@ -140,9 +143,7 @@ public class GamePanel extends JPanel {
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
         am.put("up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("¡Flecha arriba presionada! Estado actual: " + model.getState());
                 model.shootBall(); 
-                System.out.println("Nuevo estado: " + model.getState());
             }
         });
     }

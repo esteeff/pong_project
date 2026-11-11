@@ -23,7 +23,6 @@ public class Ball {
         return new Rectangle2D.Double(x, y, DIAMETER, DIAMETER);
     }
 
-    // ESTOS SON LOS MÉTODOS QUE FALTAN:
     public double getX() { return x; }
     public double getY() { return y; }
     public void setX(double x) { this.x = x; }

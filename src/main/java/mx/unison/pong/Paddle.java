@@ -4,9 +4,9 @@ import java.awt.geom.Rectangle2D;
 
 public class Paddle {
     private double x, y; // Posición
-    private final double WIDTH = 100; // Ancho de la raqueta
-    private final double HEIGHT = 15; // Alto de la raqueta
-    private final double SPEED = 8; // Velocidad de movimiento
+    private final double WIDTH = 100; // ancho de la raqueta
+    private final double HEIGHT = 15; // alto de la raqueta
+    private final double SPEED = 8; // velocidad de movimiento
 
     public Paddle(double x, double y) {
         this.x = x;
@@ -21,13 +21,13 @@ public class Paddle {
         x += SPEED;
     }
 
-    // Método para que la raqueta no se salga de la pantalla
+    // metodo para que la raqueta no se salga de la pantalla
     public void keepInBounds(double boardWidth) {
         if (x < 0) {
-            x = 0; // Si se sale por la izquierda, la pega al borde
+            x = 0; // si se sale por la izquierda, la pega al borde
         }
         if (x + WIDTH > boardWidth) {
-            x = boardWidth - WIDTH; // Si se sale por la derecha, la pega al borde
+            x = boardWidth - WIDTH; // si se sale por la derecha, la pega al borde
         }
     }
 
@@ -35,7 +35,6 @@ public class Paddle {
         return new Rectangle2D.Double(x, y, WIDTH, HEIGHT);
     }
 
-    // Getters
     public double getX() { return x; }
     public double getY() { return y; }
     public double getWidth() { return WIDTH; }
