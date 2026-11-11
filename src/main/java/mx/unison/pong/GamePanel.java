@@ -12,8 +12,22 @@ public class GamePanel extends JPanel {
         this.model = model;
         setPreferredSize(new Dimension(GameModel.WIDTH, GameModel.HEIGHT));
         setBackground(Color.BLACK);
+        setLayout(null); // Para posicionar el botón manualmente
+
+        // Crear botón de Pausa
+        JButton pauseButton = new JButton("Pausa");
+        pauseButton.setBounds(GameModel.WIDTH - 90, 10, 80, 30); 
+        pauseButton.setFocusable(false); 
+        pauseButton.addActionListener(e -> {
+            model.togglePause();
+            if (model.getState() == GameState.PAUSED) {
+                pauseButton.setText("Despausa");
+            } else {
+                pauseButton.setText("Pausa");
+            }
+        });
+        add(pauseButton);
         
-        // Configurar los controles (Key Bindings)
         setupKeyBindings();
     }
 
@@ -22,17 +36,17 @@ public class GamePanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // 1. Dibujar Raqueta
+        // raqueta
         Paddle p = model.getPaddle();
         g2d.setColor(Color.WHITE);
         g2d.fillRect((int) p.getX(), (int) p.getY(), (int) p.getWidth(), (int) p.getHeight());
 
-        // 2. Dibujar Pelota
+        // pelota
         Ball b = model.getBall();
         g2d.setColor(Color.WHITE); // O Color.RED para que resalte
         g2d.fillOval((int) b.getX(), (int) b.getY(), b.getDiameter(), b.getDiameter());
 
-        // 3. Dibujar Ladrillos
+        // ladrillos
         for (Brick brick : model.getBricks()) {
             if (!brick.isDestroyed()) {
                 g2d.setColor(brick.getColor());
@@ -41,26 +55,31 @@ public class GamePanel extends JPanel {
             }
         }
 
-        // 4. Dibujar Puntaje
+        // puntaje
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + model.getScore(), 10, 20);
 
-        // 5. Dibujar Mensajes de Estado
+        // mensajes de estado
         g2d.setFont(new Font("Arial", Font.BOLD, 30));
         g2d.setColor(Color.YELLOW);
         String msg = "";
         
-        if (model.getState() == GameState.PAUSED) {
-            msg = "PAUSADO (Presiona Espacio)";
+            if (model.getState() == GameState.READY) {
+            msg = "Presiona flecha arriba para comenzar";
+            g2d.setFont(new Font("Arial", Font.BOLD, 20)); // letra un poco más chica
+        } else if (model.getState() == GameState.PAUSED) {
+            msg = "PAUSADO";
         } else if (model.getState() == GameState.GAME_OVER) {
-            msg = "GAME OVER";
+            msg = "GAME OVER - Presiona R para reiniciar";
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
         } else if (model.getState() == GameState.WIN) {
             msg = "¡GANASTE!";
+            g2d.setFont(new Font("Arial", Font.BOLD, 30));
         }
 
         if (!msg.isEmpty()) {
-            // Centrar el texto en pantalla
+            // centrar el texto en pantalla
             FontMetrics fm = g2d.getFontMetrics();
             int x = (getWidth() - fm.stringWidth(msg)) / 2;
             int y = getHeight() / 2;
@@ -69,11 +88,14 @@ public class GamePanel extends JPanel {
     }
 
     private void setupKeyBindings() {
-        // Asignar teclas usando InputMap y ActionMap
+
+        
+
+        // asignar teclas
         InputMap im = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = getActionMap();
 
-        // Flecha Izquierda
+        // flecha izquierda
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), "left");
         am.put("left", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -84,7 +106,7 @@ public class GamePanel extends JPanel {
             }
         });
 
-        // Flecha Derecha
+        // flecha derecha
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "right");
         am.put("right", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -110,6 +132,17 @@ public class GamePanel extends JPanel {
                 if (model.getState() == GameState.GAME_OVER) {
                     model.resetGame();
                 }
+            }
+        });
+
+
+        // flecha Arriba (Disparar)
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
+        am.put("up", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("¡Flecha arriba presionada! Estado actual: " + model.getState());
+                model.shootBall(); 
+                System.out.println("Nuevo estado: " + model.getState());
             }
         });
     }

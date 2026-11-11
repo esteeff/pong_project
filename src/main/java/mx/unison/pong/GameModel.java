@@ -20,9 +20,9 @@ public class GameModel {
         resetGame();
     }
 
-    public void resetGame() {
-        // Crear pelota y raqueta en posiciones iniciales
-        ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 4, -4);
+       public void resetGame() {
+        // crear pelota y raqueta en posiciones iniciales
+        ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0); // velocidad 0 al inicio
         paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
         
         bricks = new ArrayList<>();
@@ -30,15 +30,14 @@ public class GameModel {
 
         score = 0;
         lives = 3;
-        state = GameState.RUNNING; // Al inicio el juego corre
+        state = GameState.READY; // empieza en READY, no en RUNNING
     }
-
     private void createBricks() {
         int rows = 5;
         int cols = 8;
         double brickWidth = 70;
         double brickHeight = 20;
-        double startX = 35; // Para que quede centrado
+        double startX = 35; // para que quede centrado
         double startY = 50;
 
         for (int i = 0; i < rows; i++) {
@@ -46,81 +45,85 @@ public class GameModel {
                 double x = startX + (j * brickWidth);
                 double y = startY + (i * brickHeight);
                 
-                // Asignar resistencia y color dependiendo de la fila
+                // resistencia y color dependiendo de la fila
                 int resistance;
                 Color color;
-                if (i == 0) { // Fila superior (más dura)
+                if (i == 0) { // fila superior (más dura)
                     resistance = 3;
                     color = Color.RED;
                 } else if (i == 1) {
                     resistance = 2;
                     color = Color.ORANGE;
-                } else { // Filas inferiores (fáciles)
+                } else { // filas inferiores (fáciles)
                     resistance = 1;
                     color = Color.GREEN;
                 }
                 
-                // Espacio de 2px entre ladrillos
+                // espacio de 2px entre ladrillos
                 bricks.add(new Brick(x, y, brickWidth - 2, brickHeight - 2, color, resistance));
             }
         }
     }
-    
-    // --- MÉTODOS DE ACTUALIZACIÓN (Lógica) ---
 
-    public void update() {
+              public void update() {
+        if (state == GameState.READY) {
+            ball.setX(paddle.getX() + (paddle.getWidth() / 2) - (ball.getDiameter() / 2.0));
+            ball.setY(paddle.getY() - ball.getDiameter() - 1);
+            return; 
+        }
+        
         if (state != GameState.RUNNING) {
-            return; // Si está pausado, no se mueve nada
+            return; 
         }
 
-        ball.move();
+         ball.move();
 
-        // 1. Colisión con paredes laterales
+        // colisión con paredes laterales
         if (ball.getX() <= 0) {
             ball.setX(0);
-            ball.setDx(-ball.getDx()); // Rebote
+            ball.setDx(-ball.getDx()); // rebote
         } else if (ball.getX() + ball.getDiameter() >= WIDTH) {
             ball.setX(WIDTH - ball.getDiameter());
             ball.setDx(-ball.getDx());
         }
 
-        // 2. Colisión con el techo
+        // colisión con el techo
         if (ball.getY() <= 0) {
             ball.setY(0);
             ball.setDy(-ball.getDy());
         }
 
-        // 3. Colisión con la raqueta
+        // colisión con la raqueta
         if (ball.getBounds().intersects(paddle.getBounds())) {
-            if (ball.getDy() > 0) { // Solo rebotar si va hacia abajo
+            if (ball.getDy() > 0) { // solo rebotar si va hacia abajo
                 ball.setY(paddle.getY() - ball.getDiameter());
                 ball.setDy(-ball.getDy());
             }
         }
 
-        // 4. Colisión con los ladrillos
+        // colisión con los ladrillos
         for (Brick brick : bricks) {
             if (!brick.isDestroyed() && ball.getBounds().intersects(brick.getShape())) {
-                brick.hit(); // Le pega al ladrillo
-                ball.setDy(-ball.getDy()); // Rebote vertical
-                score += 10; // Sumar puntos
-                break; // Solo romper un ladrillo por frame
+                brick.hit(); // le pega al ladrillo
+                ball.setDy(-ball.getDy()); // rebote vertical
+                score += 10; // sumar puntos
+                break; // solo romper un ladrillo por frame
             }
         }
 
-        // 5. Pérdida de pelota (cae al fondo)
+        // perdida de pelota (cae al fondo)
         if (ball.getY() > HEIGHT) {
             lives--;
             if (lives <= 0) {
                 state = GameState.GAME_OVER;
             } else {
-                // Reiniciar pelota y raqueta
+                // reiniciar pelota y raqueta
                 ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 4, -4);
                 paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
             }
         }
 
-        // 6. Condición de victoria
+        // condición de victoria
         boolean allDestroyed = true;
         for (Brick b : bricks) {
             if (!b.isDestroyed()) {
@@ -133,7 +136,14 @@ public class GameModel {
         }
     }
 
-    // --- MÉTODOS DE CONTROL ---
+    public void shootBall() {
+        if (state == GameState.READY) {
+            state = GameState.RUNNING;
+            ball.setDx(4);  // velocidad inicial X
+            ball.setDy(-4); // velocidad inicial Y
+        }
+    }
+
     public void togglePause() {
         if (state == GameState.RUNNING) {
             state = GameState.PAUSED;
@@ -142,7 +152,7 @@ public class GameModel {
         }
     }
 
-    // Getters
+   
     public Ball getBall() { return ball; }
     public Paddle getPaddle() { return paddle; }
     public List<Brick> getBricks() { return bricks; }
