@@ -39,7 +39,7 @@ public class GameModel {
         double brickWidth = 70;
         double brickHeight = 20;
         double startX = 35; // para que quede centrado
-        double startY = 50;
+        double startY = 90;
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
@@ -66,13 +66,25 @@ public class GameModel {
         }
     }
 
-              public void update() {
+    public void update() {
         if (state == GameState.READY) {
             ball.setX(paddle.getX() + (paddle.getWidth() / 2) - (ball.getDiameter() / 2.0));
             ball.setY(paddle.getY() - ball.getDiameter() - 1);
             return; 
         }
         
+        // NUEVO: Mover la raqueta si las teclas están presionadas
+        if (paddle.isMovingLeft()) {
+            paddle.moveLeft();
+            paddle.keepInBounds(WIDTH);
+        }
+        if (paddle.isMovingRight()) {
+            paddle.moveRight();
+            paddle.keepInBounds(WIDTH);
+        }
+
+        ball.move();
+
         if (state != GameState.RUNNING) {
             return; 
         }
@@ -97,12 +109,32 @@ public class GameModel {
             Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
         }
 
-        // colisión con la raqueta
+        // colisión con la raqueta (rebote según el punto de impacto)
         if (ball.getBounds().intersects(paddle.getBounds())) {
-            if (ball.getDy() > 0) { 
+            if (ball.getDy() > 0) { // solo rebotar si va hacia abajo
                 ball.setY(paddle.getY() - ball.getDiameter());
-                ball.setDy(-ball.getDy());
-                Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
+
+                // --- NUEVA LÓGICA DE ÁNGULO ---
+                // Calculamos qué tan lejos del centro de la raqueta golpeó la pelota.
+                // Va de -1.0 (extremo izquierdo) a 1.0 (extremo derecho)
+                double centroRaqueta = paddle.getX() + (paddle.getWidth() / 2.0);
+                double centroPelota = ball.getX() + (ball.getDiameter() / 2.0);
+                
+                // Calculamos la proporción del golpe
+                double impacto = (centroPelota - centroRaqueta) / (paddle.getWidth() / 2.0);
+                
+                // Limitamos el impacto para que no sea mayor a 1 o menor a -1
+                if (impacto < -1.0) impacto = -1.0;
+                if (impacto > 1.0) impacto = 1.0;
+
+                // Asignamos la nueva velocidad horizontal según el impacto
+                // Si impacto es 0, se va derecho. Si es -1, va a la izquierda. Si es 1, a la derecha.
+                ball.setDx(impacto * 3); // Multiplicamos por 5 para darle velocidad
+                
+                // Hacemos que siempre suba al rebotar
+                ball.setDy(-Math.abs(ball.getDy()));
+                
+                Toolkit.getDefaultToolkit().beep();
             }
         }
 
@@ -147,11 +179,11 @@ public class GameModel {
         }
     }
 
-    public void shootBall() {
+       public void shootBall() {
         if (state == GameState.READY) {
             state = GameState.RUNNING;
-            ball.setDx(4);  // velocidad inicial X
-            ball.setDy(-4); // velocidad inicial Y
+            ball.setDx(0);  //  no se mueve ni a la izquierda ni a la derecha
+            ball.setDy(-3.5); // sube directo hacia arriba (más rápido)
         }
     }
 

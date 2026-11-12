@@ -55,15 +55,32 @@ public class GamePanel extends JPanel {
             }
         }
 
-        // puntaje y vidas
+        
+        // dibujar puntaje
         g2d.setColor(Color.WHITE);
         g2d.setFont(new Font("Arial", Font.BOLD, 18));
         g2d.drawString("Score: " + model.getScore(), 10, 20);
         
-        // vidas
-        g2d.setColor(Color.RED);
-        g2d.drawString("Vidas: " + model.getLives(), 10, 45);
+        // NUEVO: Dibujar Vidas como círculos (estilo arcade)
+        int vidaX = 20; // Posición inicial X de los círculos
+        int vidaY = 45; // Posición inicial Y
+        int diametro = 15; // Tamaño de los círculos
 
+        for (int i = 0; i < 3; i++) {
+            g2d.setColor(Color.WHITE); // Color de los círculos
+            
+            if (i < model.getLives()) {
+                // Si es una vida que aún tienes, se dibuja rellena
+                g2d.fillOval(vidaX, vidaY, diametro, diametro);
+            } else {
+                // Si es una vida perdida, se dibuja solo el contorno
+                g2d.drawOval(vidaX, vidaY, diametro, diametro);
+            }
+            
+            vidaX += 25; // Separación entre círculos
+        }
+
+        
         // mensajes de estado
         g2d.setColor(Color.YELLOW);
         String msg = "";
@@ -90,60 +107,65 @@ public class GamePanel extends JPanel {
         }
     }
 
-    private void setupKeyBindings() {
-
-        
-
-        // asignar teclas
+       private void setupKeyBindings() {
         InputMap im = getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         ActionMap am = getActionMap();
 
-        // flecha izquierda
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), "left");
-        am.put("left", new AbstractAction() {
+        // --- FLECHA IZQUIERDA ---
+        // Presionar
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), "leftPressed");
+        am.put("leftPressed", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (model.getState() == GameState.RUNNING) {
-                    model.getPaddle().moveLeft();
-                    model.getPaddle().keepInBounds(GameModel.WIDTH);
-                }
+                model.getPaddle().setMovingLeft(true);
+            }
+        });
+        // Soltar
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "leftReleased");
+        am.put("leftReleased", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                model.getPaddle().setMovingLeft(false);
             }
         });
 
-        // flecha derecha
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "right");
-        am.put("right", new AbstractAction() {
+        // --- FLECHA DERECHA ---
+        // Presionar
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "rightPressed");
+        am.put("rightPressed", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (model.getState() == GameState.RUNNING) {
-                    model.getPaddle().moveRight();
-                    model.getPaddle().keepInBounds(GameModel.WIDTH);
-                }
+                model.getPaddle().setMovingRight(true);
+            }
+        });
+        // Soltar
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), "rightReleased");
+        am.put("rightReleased", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                model.getPaddle().setMovingRight(false);
             }
         });
 
-        // Espacio (Pausa / Reanudar)
+        // --- FLECHA ARRIBA (Disparar) ---
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
+        am.put("up", new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                model.shootBall();
+            }
+        });
+
+        // --- ESPACIO (Pausa) ---
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0, false), "pause");
         am.put("pause", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 model.togglePause();
             }
         });
-        
-        // Tecla R (Reiniciar si perdió)
+
+        // --- R (Reiniciar) ---
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0, false), "restart");
         am.put("restart", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
-                if (model.getState() == GameState.GAME_OVER) {
+                if (model.getState() == GameState.GAME_OVER || model.getState() == GameState.WIN) {
                     model.resetGame();
                 }
-            }
-        });
-
-
-        // flecha Arriba (Disparar)
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
-        am.put("up", new AbstractAction() {
-            public void actionPerformed(ActionEvent e) {
-                model.shootBall(); 
             }
         });
     }
