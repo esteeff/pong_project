@@ -67,13 +67,8 @@ public class GameModel {
     }
 
     public void update() {
-        if (state == GameState.READY) {
-            ball.setX(paddle.getX() + (paddle.getWidth() / 2) - (ball.getDiameter() / 2.0));
-            ball.setY(paddle.getY() - ball.getDiameter() - 1);
-            return; 
-        }
-        
-        // NUEVO: Mover la raqueta si las teclas están presionadas
+       
+        // mover la raqueta SIEMPRE (incluso en READY)
         if (paddle.isMovingLeft()) {
             paddle.moveLeft();
             paddle.keepInBounds(WIDTH);
@@ -83,13 +78,21 @@ public class GameModel {
             paddle.keepInBounds(WIDTH);
         }
 
-        ball.move();
+        // si está en READY, la pelota sigue a la raqueta
+        if (state == GameState.READY) {
+            ball.setX(paddle.getX() + (paddle.getWidth() / 2) - (ball.getDiameter() / 2.0));
+            ball.setY(paddle.getY() - ball.getDiameter() - 1);
+            return; 
+        }
 
+        // 3. si está pausado o terminado, no hacer nada más
         if (state != GameState.RUNNING) {
             return; 
         }
 
-         ball.move();
+        // 4. mover la pelota
+        ball.move();
+    
 
          // colisión con paredes 
         if (ball.getX() <= 0) {
@@ -129,7 +132,7 @@ public class GameModel {
 
                 // Asignamos la nueva velocidad horizontal según el impacto
                 // Si impacto es 0, se va derecho. Si es -1, va a la izquierda. Si es 1, a la derecha.
-                ball.setDx(impacto * 3); // Multiplicamos por 5 para darle velocidad
+                ball.setDx(impacto * 3); // Multiplicamos por 3 para darle velocidad
                 
                 // Hacemos que siempre suba al rebotar
                 ball.setDy(-Math.abs(ball.getDy()));
@@ -150,20 +153,18 @@ public class GameModel {
         }
 
         // perdida de pelota (cae al fondo)
-
-        
         if (ball.getY() > HEIGHT) {
-            Toolkit.getDefaultToolkit().beep(); // <-- SONIDO
-            Toolkit.getDefaultToolkit().beep(); // <-- Dos veces para que suene diferente
+            Toolkit.getDefaultToolkit().beep(); 
             lives--;
+            
             if (lives <= 0) {
                 state = GameState.GAME_OVER;
             } else {
-                // reiniciar pelota y raqueta
-                ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 4, -4);
+                // reinicia la pelota con velocidad 0 y pegarla a la raqueta
+                ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0);
                 paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
+                state = GameState.READY; // volver a READY para que no salga disparada
             }
-
         }
 
         // condición de victoria

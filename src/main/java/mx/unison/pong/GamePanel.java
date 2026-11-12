@@ -112,14 +112,12 @@ public class GamePanel extends JPanel {
         ActionMap am = getActionMap();
 
         // --- FLECHA IZQUIERDA ---
-        // Presionar
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, false), "leftPressed");
         am.put("leftPressed", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 model.getPaddle().setMovingLeft(true);
             }
         });
-        // Soltar
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0, true), "leftReleased");
         am.put("leftReleased", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -128,14 +126,14 @@ public class GamePanel extends JPanel {
         });
 
         // --- FLECHA DERECHA ---
-        // Presionar
+        // presionar
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, false), "rightPressed");
         am.put("rightPressed", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
                 model.getPaddle().setMovingRight(true);
             }
         });
-        // Soltar
+        // soltar
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0, true), "rightReleased");
         am.put("rightReleased", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -143,7 +141,7 @@ public class GamePanel extends JPanel {
             }
         });
 
-        // --- FLECHA ARRIBA (Disparar) ---
+        // --- FLECHA ARRIBA (disparar) ---
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0, false), "up");
         am.put("up", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {
@@ -159,7 +157,7 @@ public class GamePanel extends JPanel {
             }
         });
 
-        // --- R (Reiniciar) ---
+        // R (Reiniciar) ---
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_R, 0, false), "restart");
         am.put("restart", new AbstractAction() {
             public void actionPerformed(ActionEvent e) {

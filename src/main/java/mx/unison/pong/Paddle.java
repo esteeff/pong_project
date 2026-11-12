@@ -6,7 +6,7 @@ public class Paddle {
     private double x, y; // Posición
     private final double WIDTH = 100; // ancho de la raqueta
     private final double HEIGHT = 15; // alto de la raqueta
-    private final double SPEED = 12; // velocidad de movimiento
+    private final double SPEED = 6; // velocidad de movimiento
     private boolean movingLeft = false;
     private boolean movingRight = false;
 
