@@ -49,15 +49,19 @@ public class GameModel {
                 // resistencia y color dependiendo de la fila
                 int resistance;
                 Color color;
-                if (i == 0) { // fila superior (más dura)
-                    resistance = 3;
-                    color = Color.RED;
-                } else if (i == 1) {
-                    resistance = 2;
-                    color = Color.ORANGE;
-                } else { // filas inferiores (fáciles)
+                
+                if (i == 0) { // Fila superior: Azul
                     resistance = 1;
-                    color = Color.GREEN;
+                    color = new Color(100, 150, 255); // Azul claro
+                } else if (i == 1) { // Segunda fila: Rojo
+                    resistance = 2;
+                    color = new Color(220, 80, 80); // Rojo suave
+                } else if (i == 2) { // Tercera fila: Amarillo
+                    resistance = 3;
+                    color = new Color(240, 200, 80); // Amarillo mostaza
+                } else { // Fila inferior: Verde
+                    resistance = 1;
+                    color = new Color(80, 160, 100); // Verde oliva
                 }
                 
                 // espacio de 2px entre ladrillos
@@ -184,7 +188,7 @@ public class GameModel {
         if (state == GameState.READY) {
             state = GameState.RUNNING;
             ball.setDx(0);  //  no se mueve ni a la izquierda ni a la derecha
-            ball.setDy(-3.5); // sube directo hacia arriba (más rápido)
+            ball.setDy(4.8); // sube directo hacia arriba (más rápido)
         }
     }
 
