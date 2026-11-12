@@ -7,6 +7,9 @@ import java.awt.event.KeyEvent;
 
 public class GamePanel extends JPanel {
     private GameModel model;
+    
+    // fuente retro para todo el juego
+    private final Font fuenteRetro = new Font("Monospaced", Font.BOLD, 20); 
 
     public GamePanel(GameModel model) {
         this.model = model;
@@ -15,28 +18,38 @@ public class GamePanel extends JPanel {
         setLayout(null);
 
         // botón de pausa
-        JButton pauseButton = new JButton("Pausa");
-        pauseButton.setBounds(GameModel.WIDTH - 90, 10, 80, 30);
+        JButton pauseButton = new JButton("PAUSA");
+        pauseButton.setBounds(GameModel.WIDTH - 100, 10, 90, 30);
         pauseButton.setFocusable(false);
+        pauseButton.setBackground(new Color(60, 60, 60));
+        pauseButton.setForeground(Color.WHITE);
+        pauseButton.setFont(new Font("Monospaced", Font.BOLD, 14));
+        pauseButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        
         pauseButton.addActionListener(e -> {
             model.togglePause();
             if (model.getState() == GameState.PAUSED) {
-                pauseButton.setText("Despausa");
+                pauseButton.setText("DESPAUSA");
             } else {
-                pauseButton.setText("Pausa");
+                pauseButton.setText("PAUSA");
             }
         });
         add(pauseButton);
 
-        // boton de jugar de nuevo 
-        JButton restartButton = new JButton("Jugar de Nuevo");
-        restartButton.setBounds(GameModel.WIDTH / 2 - 80, GameModel.HEIGHT / 2 + 50, 160, 40);
+        // botón de jugar de nuevo (estilo retro)
+        JButton restartButton = new JButton("JUGAR DE NUEVO");
+        restartButton.setBounds(GameModel.WIDTH / 2 - 100, GameModel.HEIGHT / 2 + 40, 200, 40);
         restartButton.setFocusable(false);
         restartButton.setVisible(false);
+        restartButton.setBackground(new Color(60, 60, 60)); 
+        restartButton.setForeground(Color.WHITE);
+        restartButton.setFont(new Font("Monospaced", Font.BOLD, 16));
+        restartButton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        
         restartButton.addActionListener(e -> {
             model.resetGame();
             restartButton.setVisible(false);
-            pauseButton.setText("Pausa");
+            pauseButton.setText("PAUSA");
         });
         add(restartButton);
         
@@ -69,8 +82,8 @@ public class GamePanel extends JPanel {
 
         // dibujar puntaje
         g2d.setColor(new Color(240, 240, 240));
-        g2d.setFont(new Font("Arial", Font.BOLD, 18));
-        g2d.drawString("Score: " + model.getScore(), 10, 20);
+        g2d.setFont(new Font("Monospaced", Font.BOLD, 18));
+        g2d.drawString("SCORE: " + model.getScore(), 10, 20);
         
         // dibujar vidas como circulos
         int vidaX = 20;
@@ -90,8 +103,8 @@ public class GamePanel extends JPanel {
         // dibujar mensajes de estado
         if (model.getState() == GameState.READY) {
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 20));
-            String msg = "Presiona Flecha Arriba para comenzar";
+            g2d.setFont(new Font("Monospaced", Font.BOLD, 18));
+            String msg = "PRESIONA FLECHA ARRIBA";
             FontMetrics fm = g2d.getFontMetrics();
             int x = (getWidth() - fm.stringWidth(msg)) / 2;
             int y = getHeight() / 2;
@@ -99,7 +112,7 @@ public class GamePanel extends JPanel {
 
         } else if (model.getState() == GameState.PAUSED) {
             g2d.setColor(Color.WHITE);
-            g2d.setFont(new Font("Arial", Font.BOLD, 20));
+            g2d.setFont(new Font("Monospaced", Font.BOLD, 30));
             String msg = "PAUSADO";
             FontMetrics fm = g2d.getFontMetrics();
             int x = (getWidth() - fm.stringWidth(msg)) / 2;
@@ -107,9 +120,9 @@ public class GamePanel extends JPanel {
             g2d.drawString(msg, x, y);
 
         } else if (model.getState() == GameState.GAME_OVER || model.getState() == GameState.WIN) {
-            // dibujar recuadro de fin de juego
-            int boxWidth = 400;
-            int boxHeight = 200;
+            // recuadro de fin de juego
+            int boxWidth = 450;
+            int boxHeight = 250;
             int boxX = (getWidth() - boxWidth) / 2;
             int boxY = (getHeight() - boxHeight) / 2;
 
@@ -120,23 +133,29 @@ public class GamePanel extends JPanel {
             g2d.setStroke(new BasicStroke(3));
             g2d.drawRoundRect(boxX, boxY, boxWidth, boxHeight, 20, 20);
 
-            g2d.setFont(new Font("Arial", Font.BOLD, 30));
+            g2d.setFont(new Font("Monospaced", Font.BOLD, 35));
             String titulo = (model.getState() == GameState.WIN) ? "¡GANASTE!" : "FIN DEL JUEGO";
             FontMetrics fmTitulo = g2d.getFontMetrics();
             int tituloX = boxX + (boxWidth - fmTitulo.stringWidth(titulo)) / 2;
-            g2d.drawString(titulo, tituloX, boxY + 60);
+            g2d.drawString(titulo, tituloX, boxY + 70);
 
-            g2d.setFont(new Font("Arial", Font.BOLD, 20));
-            String scoreMsg = "PUNTUACIÓN: " + model.getScore();
+            g2d.setFont(new Font("Monospaced", Font.BOLD, 20));
+            String scoreMsg = "PUNTUACION: " + model.getScore();
             FontMetrics fmScore = g2d.getFontMetrics();
             int scoreX = boxX + (boxWidth - fmScore.stringWidth(scoreMsg)) / 2;
-            g2d.drawString(scoreMsg, scoreX, boxY + 110);
+            g2d.drawString(scoreMsg, scoreX, boxY + 120);
+            
+            // mostrar el record mas alto
+            String highScoreMsg = "RÉCORD: " + model.getHighScore();
+            FontMetrics fmHighScore = g2d.getFontMetrics();
+            int highScoreX = boxX + (boxWidth - fmHighScore.stringWidth(highScoreMsg)) / 2;
+            g2d.drawString(highScoreMsg, highScoreX, boxY + 150);
         }
 
         // mostrar boton de reinicio si el juego termino
         Component[] components = getComponents();
         for (Component c : components) {
-            if (c instanceof JButton && ((JButton) c).getText().equals("Jugar de Nuevo")) {
+            if (c instanceof JButton && ((JButton) c).getText().equals("JUGAR DE NUEVO")) {
                 c.setVisible(model.getState() == GameState.GAME_OVER || model.getState() == GameState.WIN);
             }
         }

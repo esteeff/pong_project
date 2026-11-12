@@ -1,9 +1,12 @@
 package mx.unison.pong;
 
 import java.awt.Color;
+import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.List;
-import java.awt.Toolkit;
+import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 public class GameModel {
     public static final int WIDTH = 640;
@@ -17,11 +20,15 @@ public class GameModel {
     private int score;
     private int lives;
 
+    private int highScore;
+    private final String RECORD_FILE = "record.txt";
+
     public GameModel() {
+        loadHighScore();
         resetGame();
     }
 
-       public void resetGame() {
+    public void resetGame() {
         // crear pelota y raqueta en posiciones iniciales
         ball = new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0); // velocidad 0 al inicio
         paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
@@ -33,6 +40,7 @@ public class GameModel {
         lives = 3;
         state = GameState.READY; // empieza en READY, no en RUNNING
     }
+
     private void createBricks() {
         int rows = 5;
         int cols = 8;
@@ -71,7 +79,6 @@ public class GameModel {
     }
 
     public void update() {
-       
         // mover la raqueta SIEMPRE (incluso en READY)
         if (paddle.isMovingLeft()) {
             paddle.moveLeft();
@@ -89,16 +96,15 @@ public class GameModel {
             return; 
         }
 
-        // 3. si está pausado o terminado, no hacer nada más
+        // si está pausado o terminado, no hacer nada más
         if (state != GameState.RUNNING) {
             return; 
         }
 
-        // 4. mover la pelota
+        // mover la pelota
         ball.move();
-    
 
-         // colisión con paredes 
+        // colisión con paredes 
         if (ball.getX() <= 0) {
             ball.setX(0);
             ball.setDx(-ball.getDx()); 
@@ -121,7 +127,6 @@ public class GameModel {
             if (ball.getDy() > 0) { // solo rebotar si va hacia abajo
                 ball.setY(paddle.getY() - ball.getDiameter());
 
-                // --- NUEVA LÓGICA DE ÁNGULO ---
                 // Calculamos qué tan lejos del centro de la raqueta golpeó la pelota.
                 // Va de -1.0 (extremo izquierdo) a 1.0 (extremo derecho)
                 double centroRaqueta = paddle.getX() + (paddle.getWidth() / 2.0);
@@ -162,6 +167,7 @@ public class GameModel {
             lives--;
             
             if (lives <= 0) {
+                saveHighScore();
                 state = GameState.GAME_OVER;
             } else {
                 // reinicia la pelota con velocidad 0 y pegarla a la raqueta
@@ -180,15 +186,16 @@ public class GameModel {
             }
         }
         if (allDestroyed) {
+            saveHighScore();
             state = GameState.WIN;
         }
     }
 
-       public void shootBall() {
+    public void shootBall() {
         if (state == GameState.READY) {
             state = GameState.RUNNING;
-            ball.setDx(0);  //  no se mueve ni a la izquierda ni a la derecha
-            ball.setDy(4.8); // sube directo hacia arriba (más rápido)
+            ball.setDx(0);  // no se mueve ni a la izquierda ni a la derecha
+            ball.setDy(-4.8); // sube directo hacia arriba (más rápido)
         }
     }
 
@@ -200,11 +207,33 @@ public class GameModel {
         }
     }
 
-   
+    private void loadHighScore() {
+        try {
+            if (Files.exists(Paths.get(RECORD_FILE))) {
+                String content = new String(Files.readAllBytes(Paths.get(RECORD_FILE))).trim();
+                highScore = Integer.parseInt(content);
+            }
+        } catch (Exception e) {
+            highScore = 0;
+        }
+    }
+
+    private void saveHighScore() {
+        if (score > highScore) {
+            highScore = score;
+            try (PrintWriter out = new PrintWriter(RECORD_FILE)) {
+                out.println(highScore);
+            } catch (Exception e) {
+                System.out.println("No se pudo guardar el récord.");
+            }
+        }
+    }
+
     public Ball getBall() { return ball; }
     public Paddle getPaddle() { return paddle; }
     public List<Brick> getBricks() { return bricks; }
     public GameState getState() { return state; }
     public int getScore() { return score; }
     public int getLives() { return lives; }
+    public int getHighScore() { return highScore; }
 }
