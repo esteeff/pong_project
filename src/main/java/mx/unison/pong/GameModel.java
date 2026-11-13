@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 public class GameModel {
     public static final int WIDTH = 640;
     public static final int HEIGHT = 480;
+    public static int nivelGlobal = 1;
 
     private List<Ball> balls; 
     private List<Laser> lasers; 
@@ -45,12 +46,32 @@ public class GameModel {
         score = 0;
         lives = 3;
         nivel = 1;
+        nivelGlobal = 1;
+        state = GameState.MENU;
+    }
+
+    public void iniciarJuego() {
+        state = GameState.READY;
+    }
+
+    public void iniciarNivel(int nivelSeleccionado) {
+        nivel = nivelSeleccionado;
+        nivelGlobal = nivel;
+        lives = 3;
+        score = 0; // reiniciar score
+        balls.clear();
+        lasers.clear();
+        balls.add(new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0));
+        paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
+        powerUps.clear();
+        createBricks();
         state = GameState.READY;
     }
 
     private void createBricks() {
         bricks.clear();
         int rows = 4 + nivel; 
+        if (nivel == 3) rows = 8; 
         if (rows > 8) rows = 8; 
 
         int cols = 8;
@@ -167,9 +188,7 @@ public class GameModel {
                 if (p.getTipo() == PowerUp.Tipo.PELOTA) {
                     balls.add(new Ball(paddle.getX() + 40, paddle.getY() - 20, 3, -4.8));
                 } else if (p.getTipo() == PowerUp.Tipo.LASER) {
-                    // 3 lasers de cada lado, alineados verticalmente
                     for (int j = 0; j < 3; j++) {
-                        // mismo X, distinto Y para que vayan en fila
                         lasers.add(new Laser(paddle.getX() + 10, paddle.getY() - 20 - (j * 20)));
                         lasers.add(new Laser(paddle.getX() + paddle.getWidth() - 15, paddle.getY() - 20 - (j * 20)));
                     }
@@ -188,19 +207,25 @@ public class GameModel {
             if (!b.isDestroyed()) { allDestroyed = false; break; }
         }
         if (allDestroyed) {
-            nivel++; 
-            if (nivel > 3) { 
-                saveHighScore(); state = GameState.WIN;
+            if (nivel < 3) {
+                state = GameState.NIVEL_COMPLETADO;
             } else {
-                lives = 3; 
-                balls.clear(); lasers.clear();
-                balls.add(new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0));
-                paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
-                powerUps.clear();
-                createBricks(); 
-                state = GameState.READY; 
+                saveHighScore(); state = GameState.WIN;
             }
         }
+    }
+
+    public void siguienteNivel() {
+        nivel++;
+        nivelGlobal = nivel;
+        lives = 3;
+        balls.clear();
+        lasers.clear();
+        balls.add(new Ball(WIDTH / 2.0 - 7, HEIGHT - 100, 0, 0));
+        paddle = new Paddle(WIDTH / 2.0 - 50, HEIGHT - 30);
+        powerUps.clear();
+        createBricks();
+        state = GameState.READY;
     }
 
     private void romperLadrillo(Brick brick) {
